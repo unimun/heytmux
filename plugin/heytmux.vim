@@ -41,9 +41,13 @@ function! s:heytmux(args, focus, count, line1, line2)
   endif
   let command = printf('ruby -I%s %s %s %s < /dev/tty',
         \ s:lib, s:bin, (a:focus ? '' : '-d ').opts, args)
-  let out = system(command)
-  if v:shell_error
-    echo substitute(out, "\n$", '', '')
+  let nr = bufadd('')
+  if has('nvim')
+      exe "below sbuffer" .nr
+      exe ":terminal " .command
+  else
+      let job = job_start(cmd_str, {'out_io': 'buffer', 'out_buf': nr, 'err_io': 'buffer', 'err_buf': nr})
+      exe "below sbuffer" .nr
   endif
 endfunction
 
